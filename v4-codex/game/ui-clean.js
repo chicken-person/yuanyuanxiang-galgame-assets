@@ -237,11 +237,17 @@
      （视频抽帧里也一直存在），那是美术素材自带的、与本闪动无关。 */
   function syncEntryNow() {
     var c = document.querySelector('[class*="chooseContainer"]');
-    if (!c) return;
-    var labels = chooseLabels(true);
-    var onEntry = !!labels && labels.length === 2 &&
-      labels.indexOf('心香') !== -1 && labels.indexOf('心碑') !== -1;
-    c.classList.toggle('yyx-entry-choose', onEntry);
+    if (c) {
+      var labels = chooseLabels(true);
+      var onEntry = !!labels && labels.length === 2 &&
+        labels.indexOf('心香') !== -1 && labels.indexOf('心碑') !== -1;
+      c.classList.toggle('yyx-entry-choose', onEntry);
+    }
+    if (window.__yyxSyncCatalog) {
+      var hadBook = document.body.classList.contains('yyx-catalog-open');
+      window.__yyxSyncCatalog(c, chooseOptionEl);
+      if (hadBook !== document.body.classList.contains('yyx-catalog-open')) updateBackBtn();
+    }
   }
   function observeEntryFlash() {
     var mo = new MutationObserver(function () { syncEntryNow(); autoChoose(); });
@@ -1623,6 +1629,7 @@
   }, true);
   document.addEventListener('wheel', function (e) {
     if (e.ctrlKey) return; // Ctrl+滚轮是浏览器缩放，不管
+    if (e.target instanceof Element && e.target.closest('#yyx-catalog-book')) return;
     // 只在剧情场景拦上滑（对话框在 DOM 里）；标题画面/图集不管
     if (e.deltaY < 0 && document.getElementById('textBoxMain')) {
       e.preventDefault();
